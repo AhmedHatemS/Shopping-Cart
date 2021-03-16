@@ -1,13 +1,6 @@
 package com.example.shoppingcart_ahatem;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -15,16 +8,14 @@ import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
     Spinner spinner;
@@ -88,14 +79,26 @@ public class MainActivity extends AppCompatActivity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(MainActivity.this, ReciteActivity.class);
-                        ShoppingItemWrapper shoppingItemWrapper = new ShoppingItemWrapper();
-                        shoppingItemWrapper.shoppingItems = MainActivity.this.shoppingItems;
-                        intent.putExtra(DATA_KEY, shoppingItemWrapper);
-                        startActivityForResult(intent, 1);
+                        Snackbar.make(v, "Are you sure to end shopping?", Snackbar.LENGTH_LONG)
+                                .setAction("Yes", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+
+                                        callReciteActivity();
+                                    }
+                                })
+                                .show();
                     }
                 }
         );
+    }
+
+    private void callReciteActivity() {
+        Intent intent = new Intent(this, ReciteActivity.class);
+        ShoppingItemWrapper shoppingItemWrapper = new ShoppingItemWrapper();
+        shoppingItemWrapper.shoppingItems = MainActivity.this.shoppingItems;
+        intent.putExtra(DATA_KEY, shoppingItemWrapper);
+        startActivityForResult(intent, 1);
     }
 
     private void setupRecycler() {
@@ -112,42 +115,8 @@ public class MainActivity extends AppCompatActivity {
         shoppingItems.clear();
         adapter.notifyDataSetChanged();
         f_btn.setVisibility(View.INVISIBLE);
-        createNotificationChannel();
     }
 
-    protected void createNotificationChannel() {
-        int NOTIFICATION_ID = 234;
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        String CHANNEL_ID = "my_channel_01";
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
-            CharSequence name = "my_channel";
-            String Description = "This is my channel";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
-            mChannel.setDescription(Description);
-            mChannel.enableLights(true);
-            mChannel.setLightColor(Color.RED);
-            mChannel.enableVibration(true);
-            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-            mChannel.setShowBadge(false);
-            notificationManager.createNotificationChannel(mChannel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.app_icon)
-                .setContentTitle("New message")
-                .setContentText("Payment is done, thank you!");
-
-        Intent resultIntent = new Intent(this, MainActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(resultPendingIntent);
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
-
-    }
 
     //ToControlFloatingButton
     static void controlFloatActionButton() {
@@ -157,5 +126,4 @@ public class MainActivity extends AppCompatActivity {
             f_btn.setVisibility(View.INVISIBLE);
         }
     }
-
 }
